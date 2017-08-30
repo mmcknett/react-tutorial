@@ -90,10 +90,16 @@ class Game extends React.Component {
         // Create list items of all the moves in history
         const moves = history.map((step, move) => {
             const description = move ? 'Move #' + move : 'Game start';
+            const descWithFormat =
+                move === this.state.moveNumber ?
+                (
+                    <b>{description}</b>
+                )
+                : description
             return (
                 <li key={move}>
                     <a href="#" onClick={() => this.jumpTo(move)}>
-                    {description}
+                    {descWithFormat}
                     </a>
                 </li>
             );
