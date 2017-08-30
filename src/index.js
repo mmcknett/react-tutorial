@@ -51,13 +51,14 @@ class Game extends React.Component {
             history: [{
                 squares: Array(9).fill(null),
             }],
+            moveNumber: 0,
             xIsNext: true,
         };
     }
 
     handleClick(i) {
-        const history = this.state.history;
-        const current = history[history.length - 1];
+        const history = this.state.history.slice(0, this.state.moveNumber + 1);
+        const current = history[this.state.moveNumber];
         const squares = current.squares.slice();
 
         if (calculateWinner(squares) || squares[i])
@@ -69,18 +70,42 @@ class Game extends React.Component {
         squares[i] = this.state.xIsNext ? 'X' : 'O';
         this.setState({
             history: history.concat([{squares: squares}]),
+            moveNumber: history.length,
             xIsNext: !this.state.xIsNext
         });
     }
 
+    jumpTo(move) {
+        this.setState({
+            moveNumber: move,
+            xIsNext: (move % 2) === 0, // Update this if X ever starts second.
+        })
+    }
+
     render() {
         const history = this.state.history;
-        const current = history[history.length - 1];
+        const current = history[this.state.moveNumber];
         const winner = calculateWinner(current.squares);
+
+        // Create list items of all the moves in history
+        const moves = history.map((step, move) => {
+            const description = move ? 'Move #' + move : 'Game start';
+            return (
+                <li key={move}>
+                    <a href="#" onClick={() => this.jumpTo(move)}>
+                    {description}
+                    </a>
+                </li>
+            );
+        });
 
         let status;
         if (winner) {
             status = 'Winner: ' + winner;
+        }
+        else if (boardFull(current.squares))
+        {
+            status = "Cat's game.";
         }
         else
         {
@@ -97,7 +122,7 @@ class Game extends React.Component {
             </div>
             <div className="game-info">
               <div>{status}</div>
-              <ol>{/* TODO */}</ol>
+              <ol>{moves}</ol>
             </div>
             </div>
         );
@@ -127,6 +152,17 @@ function calculateWinner(squares) {
     }
 
     return null;
+}
+
+function boardFull(squares) {
+    for (let i = 0; i < squares.length; ++i)
+    {
+        if (!squares[i])
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 // ========================================
